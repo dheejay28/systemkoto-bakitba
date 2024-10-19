@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Attendance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            background-color: rgb(0, 0, 0);
+            background-image: url('bg2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            margin: 0;
+            padding: 0;
+            transition: opacity 1s ease-in;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+            width: auto; 
+            text-align: center; 
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 96%; 
+            padding: 10px; 
+            margin: 10px 0;
+            border: 1px solid #ccc; 
+            border-radius: 4px;
+        }
+        button {
+            background-color: #525457;
+            color: white;
+            border: none; 
+            cursor: pointer; 
+            padding: 6px;
+            border-radius: 4px;
+            width: 100%;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #272828; 
+        }
+        .profile {
+            margin-top: 20px; 
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px; 
+            background-color: #f9f9f9;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center; 
+        }
+        .profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; 
+            margin-right: 15px;
+        }
+        .present {
+            color: green;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .absent {
+            color: red;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        #dateTime {
+            margin-bottom: 10px; 
+            font-size: 16px;
+            color: #555; 
+        }
+        #profileName {
+            font-size: 12px; 
+            font-weight: bold;  
+            margin-right: 10px; 
+        }
+        #profilePosition {
+            font-size: 12px; 
+            color: #333;
+            margin-right: 10px;
+        }
+        #profileTimestamp {
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Check Attendance</h1>
+        <div id="dateTime"></div>
+        <input type="text" id="codeInput" placeholder="Enter your code" />
+        <button onclick="checkAttendance()">Check</button>
+        <button id="homeButton" onclick="location.href='index.html'">Home</button>
+        <button onclick="readNFC()">TAP your ID</button>
+        <div id="profile" class="profile">
+            <div class="profile-info">
+                <img id="profilePicture" src="" alt="Profile Picture" />
+                <div id="profileName"></div>
+                <div id="profilePosition"></div>
+                <div id="profileStatus" class="present"></div>
+            </div>
+            <div id="profileTimestamp"></div>
+        </div>
+    </div>
+
+    <script>
+        function displayDateTime() {
+            const now = new Date();
+            document.getElementById('dateTime').textContent = now.toLocaleString(); 
+        }
+
+        function checkAttendance() {
+            const code = document.getElementById('codeInput').value;
+            const profile = JSON.parse(localStorage.getItem(code)); 
+            if (profile) {
+                updateProfileDisplay(profile);
+            } else {
+                alert('No profile found with this code.');
+            }
+        }
+
+        function updateProfileDisplay(profile) {
+            document.getElementById('profileName').textContent = profile.name;
+            document.getElementById('profilePosition').textContent = profile.position; 
+            document.getElementById('profilePicture').src = profile.picture;
+
+            const now = new Date().toLocaleTimeString();
+            profile.present = true;
+            profile.timestamp = now;
+            localStorage.setItem(profile.code, JSON.stringify(profile));
+
+            const statusElement = document.getElementById('profileStatus');
+            statusElement.textContent = 'Present';
+            statusElement.className = 'present';
+            document.getElementById('profileTimestamp').textContent = now; 
+            document.getElementById('profile').style.display = 'flex'; 
+        }
+
+        async function readNFC() {
+            try {
+                const ndef = new NDEFReader();
+                await ndef.scan();
+
+                ndef.onreading = event => {
+                    const message = event.message;
+                    const codeRecord = message.records[0];
+
+                    if (codeRecord.recordType === 'text') {
+                        const decoder = new TextDecoder(codeRecord.encoding);
+                        const code = decoder.decode(codeRecord.data);
+                        document.getElementById('codeInput').value = code;
+                        checkAttendance(); 
+                    }
+                };
+            } catch (error) {
+                console.error('Error reading NFC tag:', error);
+                alert('Failed to read NFC tag: ' + error);
+            }
+        }
+
+        window.onload = function () {
+            displayDateTime();
+        };
+    </script>
+</body>
+</html>

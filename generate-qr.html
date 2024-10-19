@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Attendance Code with NFC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            background-color: rgb(0, 0, 0);
+            background-image: url('bg2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            margin: 0;
+            padding: 0;
+            transition: opacity 3s ease-in;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #525457; 
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #272828; 
+        }
+        #imagePreview {
+            margin-top: 10px;
+            max-width: 30%;
+            display: none;
+        }
+        h1 {
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Attendance Code with NFC</h1>
+        <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" placeholder="Enter Name" required>
+        </div>
+        <div>
+            <label for="position">Position</label> 
+            <input type="text" id="position" placeholder="Enter Position" required>
+        </div>
+        <div>
+            <label for="image">Upload Picture</label>
+            <input type="file" id="image" accept="image/*" onchange="previewImage()" required>
+            <img id="imagePreview" alt="Image Preview">
+        </div>
+        <div>
+            <label for="birthday">Birthday</label>
+            <input type="date" id="birthday" required>
+        </div>
+        <div>
+            <label for="age">Age</label>
+            <input type="number" id="age" placeholder="Enter Age" required>
+        </div>
+        <button onclick="generateCode()">Generate Code</button>
+        <button onclick="writeNFC()">Write to NFC</button>
+        <button onclick="readNFC()">Read from NFC</button>
+        <button onclick="location.href='admin.html'">Home</button>
+        <div id="generatedCode" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function previewImage() {
+            const file = document.getElementById('image').files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const imgPreview = document.getElementById('imagePreview');
+                imgPreview.src = e.target.result; 
+                imgPreview.style.display = 'block';
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function generateCode() {
+            const name = document.getElementById('name').value.trim();
+            const position = document.getElementById('position').value.trim();
+            const imageFile = document.getElementById('image').files[0];
+            const birthday = document.getElementById('birthday').value.trim();
+            const age = document.getElementById('age').value.trim();
+
+            if (name && position && imageFile && birthday && age) {
+                const uniqueCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const profileData = { 
+                        name, 
+                        position,
+                        picture: e.target.result, 
+                        birthday, 
+                        age, 
+                        code: uniqueCode 
+                    };
+                    
+                    localStorage.setItem(uniqueCode, JSON.stringify(profileData));
+
+                    document.getElementById('generatedCode').innerHTML = `
+                        <h2>Generated Code:</h2>
+                        <p>${uniqueCode}</p>
+                    `;
+                };
+
+                reader.readAsDataURL(imageFile);
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        async function writeNFC() {
+            const uniqueCode = document.getElementById('generatedCode').innerText.split(":")[1].trim();
+            if (!uniqueCode) {
+                alert('Please generate a code first.');
+                return;
+            }
+
+            try {
+                const ndef = new NDEFWriter();
+                await ndef.write({
+                    records: [
+                        {
+                            recordType: 'text',
+                            data: `Attendance Code: ${uniqueCode}`,
+                        },
+                    ],
+                });
+                alert('NFC tag written successfully!');
+            } catch (error) {
+                console.error(error);
+                alert('Failed to write NFC tag: ' + error);
+            }
+        }
+
+        async function readNFC() {
+            try {
+                const ndef = new NDEFReader();
+                await ndef.scan();
+
+                ndef.onreading = event => {
+                    const message = event.message;
+                    const codeRecord = message.records[0];
+
+                    if (codeRecord.recordType === 'text') {
+                        const decoder = new TextDecoder(codeRecord.encoding);
+                        const code = decoder.decode(codeRecord.data);
+                        alert('Read NFC: ' + code);
+                    }
+                };
+            } catch (error) {
+                console.error(error);
+                alert('Failed to read NFC tag: ' + error);
+            }
+        }
+    </script>
+</body>
+</html>

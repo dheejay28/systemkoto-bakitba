@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            background-color: rgb(0, 0, 0);
+            background-image: url('bg2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            margin: 0;
+            padding: 0;
+            transition: opacity 1s ease-in;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        button {
+            background-color: #525457;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #272828;
+        }
+        h1 {
+            margin: 0 0 20px;
+        }
+        img.logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <img src="logo.png" alt="Logo" class="logo">
+        <h1>Admin Dashboard</h1>
+        <button onclick="location.href='generate-qr.html'">Generate Code</button>
+        <button onclick="location.href='profile.html'">View Profiles</button>
+        <button onclick="logout()">Log Out</button>
+    </div>
+
+    <script>
+        function loadUsers() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const profileData = JSON.parse(localStorage.getItem(key));
+
+                if (profileData) {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        ${profileData.name}
+                        <button onclick="removeUser('${key}')">Remove</button>
+                    `;
+                    userList.appendChild(listItem);
+                }
+            }
+        }
+
+        function removeUser(key) {
+            localStorage.removeItem(key);
+            loadUsers();
+            alert('User removed successfully.'); 
+        }
+
+        function logout() {
+            window.location.href = 'attendees.html';
+        }
+
+    </script>
+</body>
+</html>

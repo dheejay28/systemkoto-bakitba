@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            background-color: rgb(0, 0, 0);
+            background-image: url('bg2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            margin: 0;
+            padding: 0;
+            transition: opacity 1s ease-in;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #525457;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 7px;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 5px;
+        }
+        button:hover {
+            background-color: #272828;
+        }
+        img.logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="logo.png" alt="Logo" class="logo">
+        <h1>Mark Absent</h1>
+        <input type="text" id="codeInput" placeholder="Enter your code">
+        <button onclick="markAbsent()">Sorry Boss! Uwi muna ako!</button>
+        <button id="nfcButton">Scan NFC</button>
+        <button onclick="location.href='index.html'">Home</button>
+    </div>
+
+    <script>
+        function markAbsent() {
+            const code = document.getElementById('codeInput').value;
+
+            if (!code) {
+                alert('Please enter your code.');
+                return;
+            }
+
+            const profileData = JSON.parse(localStorage.getItem(code));
+
+            if (profileData) {
+                profileData.present = false;
+                localStorage.setItem(code, JSON.stringify(profileData));
+                alert('Aalis ka na naman idol, ingat ka ah!');
+                window.location.href = 'index.html';
+            } else {
+                alert('Invalid code. Please try again.');
+            }
+        }
+
+        async function scanNFC() {
+            try {
+                const nfc = new NDEFReader();
+                await nfc.scan();
+                alert("Tap an NFC tag to scan.");
+
+                nfc.addEventListener("NDEFReader.onreading", ({ message }) => {
+                    for (const record of message.records) {
+                        const code = new TextDecoder().decode(record.data);
+                        document.getElementById('codeInput').value = code;
+                        markAbsent();
+                    }
+                });
+            } catch (error) {
+                console.error(error);
+                alert("Error reading NFC: " + error);
+            }
+        }
+
+        document.getElementById('nfcButton').onclick = scanNFC;
+    </script>
+</body>
+</html>

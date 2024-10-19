@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            background-color: rgb(0, 0, 0);
+            background-image: url('bg2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            margin: 0;
+            padding: 0;
+            transition: opacity 1s ease-in;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px; 
+            text-align: center; 
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%; 
+            border: 1px solid #ccc; 
+            border-radius: 4px;
+            box-sizing: border-box; 
+        }
+        button {
+            background-color: #525457;
+            color: white;
+            border: none;
+            cursor: pointer; 
+        }
+        button:hover {
+            background-color: #272828;
+        }
+        h1 {
+            margin: 0 0 20px; 
+        }
+        img.logo {
+            width: 100px; 
+            height: auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <img src="logo.png" alt="Logo" class="logo">
+        <h1>Admin Login</h1>
+        <input type="password" id="adminPass" placeholder="Enter Admin Password" required>
+        <button onclick="login()">Log In</button>
+        <button onclick="goHome()">Back to Home</button>
+    </div>
+
+    <script>
+        function login() {
+            const password = document.getElementById('adminPass').value.trim();
+            if (password === 'admin123') {
+                window.location.href = 'admin.html';
+            } else {
+                alert('Invalid password.');
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
